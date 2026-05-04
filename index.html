@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Team Outing Poll</title>
+<script src="https://cdn.pubnub.com/sdk/javascript/pubnub.8.0.0.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap');
 
@@ -53,7 +54,6 @@
     z-index: 1;
   }
 
-  /* HEADER */
   .header {
     border-bottom: 1px solid var(--hairline);
     padding-bottom: 24px;
@@ -116,7 +116,6 @@
     50% { opacity: 0.5; transform: scale(0.8); }
   }
 
-  /* NAME ENTRY */
   .name-card {
     background: var(--paper);
     border: 1px solid var(--hairline);
@@ -158,14 +157,8 @@
     transition: border-color 0.2s;
   }
 
-  .name-input:focus {
-    border-color: var(--opt-3);
-  }
-
-  .name-input::placeholder {
-    color: var(--ink-soft);
-    font-style: italic;
-  }
+  .name-input:focus { border-color: var(--opt-3); }
+  .name-input::placeholder { color: var(--ink-soft); font-style: italic; }
 
   .name-submit {
     display: block;
@@ -189,7 +182,6 @@
     transform: translateY(-1px);
   }
 
-  /* GREETING */
   .greeting {
     background: var(--paper);
     border: 1px solid var(--hairline);
@@ -203,10 +195,7 @@
     flex-wrap: wrap;
   }
 
-  .greeting-text {
-    font-size: 14px;
-  }
-
+  .greeting-text { font-size: 14px; }
   .greeting-text strong {
     font-family: 'Fraunces', serif;
     font-weight: 600;
@@ -222,10 +211,8 @@
     cursor: pointer;
     font-family: inherit;
   }
-
   .change-name:hover { color: var(--ink); }
 
-  /* SECTION HEADERS */
   .section-label {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -244,7 +231,6 @@
     background: var(--hairline);
   }
 
-  /* OPTION CARDS */
   .options {
     display: grid;
     grid-template-columns: 1fr;
@@ -284,11 +270,7 @@
     box-shadow: 0 0 0 2px var(--accent);
   }
 
-  .option-emoji {
-    font-size: 40px;
-    line-height: 1;
-    margin-bottom: 16px;
-  }
+  .option-emoji { font-size: 40px; line-height: 1; margin-bottom: 16px; }
 
   .option-num {
     position: absolute;
@@ -374,7 +356,6 @@
     font-size: 11px;
   }
 
-  /* RESULTS */
   .results {
     background: var(--paper);
     border: 1px solid var(--hairline);
@@ -406,10 +387,7 @@
     letter-spacing: 0.04em;
   }
 
-  .bar-row {
-    margin-bottom: 18px;
-  }
-
+  .bar-row { margin-bottom: 18px; }
   .bar-row:last-child { margin-bottom: 0; }
 
   .bar-label {
@@ -470,7 +448,6 @@
     font-size: 10px;
   }
 
-  /* VOTERS LIST */
   .voters {
     background: transparent;
     border-top: 1px solid var(--hairline);
@@ -509,7 +486,6 @@
     font-size: 14px;
   }
 
-  /* TOAST */
   .toast {
     position: fixed;
     bottom: 24px;
@@ -552,22 +528,13 @@
     </div>
   </header>
 
-  <!-- NAME ENTRY -->
   <div id="nameEntry" class="name-card">
     <div class="num">&rarr; first things first</div>
     <h2>What's your name?</h2>
-    <input
-      id="nameInput"
-      class="name-input"
-      type="text"
-      placeholder="type your name…"
-      autocomplete="name"
-      maxlength="40"
-    />
+    <input id="nameInput" class="name-input" type="text" placeholder="type your name…" autocomplete="name" maxlength="40" />
     <button id="nameSubmit" class="name-submit">Cast my vote &rarr;</button>
   </div>
 
-  <!-- GREETING (after name entered) -->
   <div id="greeting" class="greeting hidden">
     <div class="greeting-text">
       Hey <strong id="greetingName"></strong> 👋 Pick your top choice below.
@@ -575,13 +542,11 @@
     <button id="changeName" class="change-name">not me?</button>
   </div>
 
-  <!-- VOTING OPTIONS -->
   <div id="votingSection" class="hidden">
     <div class="section-label">The contenders</div>
     <div class="options" id="optionsContainer"></div>
   </div>
 
-  <!-- RESULTS -->
   <div id="resultsSection" class="hidden">
     <div class="results">
       <div class="results-header">
@@ -599,14 +564,14 @@
   </div>
 
   <div class="footer-note">
-    Voting updates live every few seconds &bull; Refresh anytime
+    Votes sync live across all devices
   </div>
 </div>
 
 <div id="toast" class="toast">Vote saved</div>
 
 <script>
-  const OPTIONS = [
+  var OPTIONS = [
     {
       id: 'escape_room',
       emoji: '🔓',
@@ -654,177 +619,216 @@
     }
   ];
 
-  const STORAGE_KEY = 'live_poll_votes';
+  var STORAGE_KEY = 'live_poll_votes';
+  var CHANNEL = 'live-poll-madison-team-outing-2026';
 
-  let myName = sessionStorage.getItem('voter_name') || null;
-  let myVote = null;
-  let allVotes = {};
+  var myName = sessionStorage.getItem('voter_name') || null;
+  var myVote = null;
+  var allVotes = {};
 
-  // ---------- DOM refs ----------
-  const nameEntry = document.getElementById('nameEntry');
-  const nameInput = document.getElementById('nameInput');
-  const nameSubmit = document.getElementById('nameSubmit');
-  const greeting = document.getElementById('greeting');
-  const greetingName = document.getElementById('greetingName');
-  const changeName = document.getElementById('changeName');
-  const votingSection = document.getElementById('votingSection');
-  const optionsContainer = document.getElementById('optionsContainer');
-  const resultsSection = document.getElementById('resultsSection');
-  const resultsCount = document.getElementById('resultsCount');
-  const bars = document.getElementById('bars');
-  const votersList = document.getElementById('votersList');
-  const toast = document.getElementById('toast');
+  // --- PubNub real-time sync (free, no signup) ---
+  var clientId = 'voter-' + Math.random().toString(36).substr(2, 9);
+  var pubnub = new PubNub({
+    publishKey: 'demo',
+    subscribeKey: 'demo',
+    userId: clientId
+  });
 
-  // ---------- Render option cards ----------
+  pubnub.subscribe({ channels: [CHANNEL] });
+
+  pubnub.addListener({
+    message: function(event) {
+      if (event.publisher === clientId) return;
+      var data = event.message;
+      if (data.type === 'vote' && data.vote && data.vote.name && data.vote.choice) {
+        allVotes[data.vote.name] = data.vote;
+        saveVotesLocal();
+        renderResults();
+        renderOptions();
+      } else if (data.type === 'sync' && data.votes) {
+        var changed = false;
+        Object.keys(data.votes).forEach(function(name) {
+          var vote = data.votes[name];
+          if (!allVotes[name] || vote.ts > allVotes[name].ts) {
+            allVotes[name] = vote;
+            changed = true;
+          }
+        });
+        if (changed) {
+          if (myName && allVotes[myName]) {
+            myVote = allVotes[myName].choice;
+            sessionStorage.setItem('voter_choice', myVote);
+          }
+          saveVotesLocal();
+          renderResults();
+          renderOptions();
+        }
+      } else if (data.type === 'sync-request') {
+        if (Object.keys(allVotes).length > 0) {
+          publishSync();
+        }
+      }
+    }
+  });
+
+  function publishVote(vote) {
+    pubnub.publish({ channel: CHANNEL, message: { type: 'vote', vote: vote } });
+  }
+
+  function publishSync() {
+    pubnub.publish({ channel: CHANNEL, message: { type: 'sync', votes: allVotes } });
+  }
+
+  function requestSync() {
+    pubnub.publish({ channel: CHANNEL, message: { type: 'sync-request' } });
+  }
+
+  // --- DOM refs ---
+  var nameEntry = document.getElementById('nameEntry');
+  var nameInput = document.getElementById('nameInput');
+  var nameSubmit = document.getElementById('nameSubmit');
+  var greeting = document.getElementById('greeting');
+  var greetingName = document.getElementById('greetingName');
+  var changeNameBtn = document.getElementById('changeName');
+  var votingSection = document.getElementById('votingSection');
+  var optionsContainer = document.getElementById('optionsContainer');
+  var resultsSection = document.getElementById('resultsSection');
+  var resultsCount = document.getElementById('resultsCount');
+  var barsEl = document.getElementById('bars');
+  var votersList = document.getElementById('votersList');
+  var toastEl = document.getElementById('toast');
+
+  // --- Render option cards ---
   function renderOptions() {
     optionsContainer.innerHTML = '';
-    OPTIONS.forEach((opt, i) => {
-      const isSelected = myVote === opt.id;
-      const btn = document.createElement('button');
+    OPTIONS.forEach(function(opt, i) {
+      var isSelected = myVote === opt.id;
+      var btn = document.createElement('button');
       btn.className = 'option';
       btn.style.setProperty('--accent', opt.color);
       btn.style.setProperty('--accent-soft', opt.colorSoft);
       btn.dataset.selected = isSelected;
-      btn.innerHTML = `
-        <div class="option-num">No. ${String(i + 1).padStart(2, '0')}</div>
-        <div class="option-emoji">${opt.emoji}</div>
-        <div class="option-title">${opt.title}</div>
-        <div class="option-subtitle">${opt.subtitle}</div>
-        <div class="option-details">
-          ${opt.details.map(([label, value]) => `
-            <div class="option-detail-row">
-              <span class="option-detail-label">${label}</span>
-              <span class="option-detail-value">${value}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div class="option-cta">${isSelected ? 'Your pick' : 'Pick this'}</div>
-      `;
-      btn.addEventListener('click', () => castVote(opt.id));
+      btn.innerHTML =
+        '<div class="option-num">No. ' + String(i + 1).padStart(2, '0') + '</div>' +
+        '<div class="option-emoji">' + opt.emoji + '</div>' +
+        '<div class="option-title">' + opt.title + '</div>' +
+        '<div class="option-subtitle">' + opt.subtitle + '</div>' +
+        '<div class="option-details">' +
+          opt.details.map(function(d) {
+            return '<div class="option-detail-row">' +
+              '<span class="option-detail-label">' + d[0] + '</span>' +
+              '<span class="option-detail-value">' + d[1] + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<div class="option-cta">' + (isSelected ? 'Your pick' : 'Pick this') + '</div>';
+      btn.addEventListener('click', function() { castVote(opt.id); });
       optionsContainer.appendChild(btn);
     });
   }
 
-  // ---------- Storage helpers (localStorage) ----------
-  function loadAllVotes() {
+  // --- localStorage ---
+  function loadVotesLocal() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : {};
-    } catch (e) {
-      console.error('Load votes error:', e);
-      return {};
-    }
+    } catch (e) { return {}; }
   }
 
-  function saveAllVotes(votes) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
-    } catch (e) {
-      console.error('Save votes error:', e);
-    }
+  function saveVotesLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(allVotes)); } catch (e) {}
   }
 
+  // --- Cast vote ---
   function castVote(choice) {
     if (!myName) return;
-
-    allVotes[myName] = {
-      name: myName,
-      choice,
-      ts: Date.now()
-    };
-    saveAllVotes(allVotes);
-
+    var vote = { name: myName, choice: choice, ts: Date.now() };
+    allVotes[myName] = vote;
     myVote = choice;
     sessionStorage.setItem('voter_choice', choice);
-    showToast(`Vote saved — ${OPTIONS.find(o => o.id === choice).title}`);
+    saveVotesLocal();
+    publishVote(vote);
+    showToast('Vote saved — ' + OPTIONS.find(function(o) { return o.id === choice; }).title);
     renderOptions();
-    refreshResults();
+    renderResults();
   }
 
-  // ---------- Render results ----------
+  // --- Render results ---
   function renderResults() {
-    const counts = { escape_room: 0, mini_golf: 0, axe_throwing: 0 };
-    const voterList = [];
-    Object.values(allVotes).forEach(v => {
+    var counts = { escape_room: 0, mini_golf: 0, axe_throwing: 0 };
+    var voterList = [];
+    Object.values(allVotes).forEach(function(v) {
       if (counts[v.choice] !== undefined) counts[v.choice]++;
       voterList.push(v);
     });
-    const total = voterList.length;
-    const maxCount = Math.max(...Object.values(counts), 1);
+    var total = voterList.length;
+    var maxCount = Math.max.apply(null, Object.values(counts).concat([1]));
 
-    resultsCount.textContent = total === 1 ? '1 vote' : `${total} votes`;
+    resultsCount.textContent = total === 1 ? '1 vote' : total + ' votes';
 
-    bars.innerHTML = '';
-    OPTIONS.forEach(opt => {
-      const count = counts[opt.id];
-      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-      const widthPct = total > 0 ? (count / maxCount) * 100 : 0;
-      const isWinner = total > 0 && count === maxCount && count > 0;
+    barsEl.innerHTML = '';
+    OPTIONS.forEach(function(opt) {
+      var count = counts[opt.id];
+      var pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      var widthPct = total > 0 ? (count / maxCount) * 100 : 0;
+      var isWinner = total > 0 && count === maxCount && count > 0;
 
-      const row = document.createElement('div');
+      var row = document.createElement('div');
       row.className = 'bar-row';
-      row.innerHTML = `
-        <div class="bar-label">
-          <div class="bar-name">
-            <span class="bar-emoji">${opt.emoji}</span>
-            <span>${opt.title}</span>
-          </div>
-          <div class="bar-value">
-            ${count}<span class="pct">${pct}%</span>
-          </div>
-        </div>
-        <div class="bar-track">
-          <div class="bar-fill ${isWinner && total > 1 ? 'winner' : ''}"
-               style="width: ${widthPct}%; --bar-color: ${opt.color};"></div>
-        </div>
-      `;
-      bars.appendChild(row);
+      row.innerHTML =
+        '<div class="bar-label">' +
+          '<div class="bar-name">' +
+            '<span class="bar-emoji">' + opt.emoji + '</span>' +
+            '<span>' + opt.title + '</span>' +
+          '</div>' +
+          '<div class="bar-value">' +
+            count + '<span class="pct">' + pct + '%</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bar-track">' +
+          '<div class="bar-fill ' + (isWinner && total > 1 ? 'winner' : '') + '"' +
+            ' style="width: ' + widthPct + '%; --bar-color: ' + opt.color + ';"></div>' +
+        '</div>';
+      barsEl.appendChild(row);
     });
 
-    // Voters list
     if (voterList.length === 0) {
       votersList.innerHTML = '<span class="empty">No votes yet — be the first!</span>';
     } else {
-      voterList.sort((a, b) => b.ts - a.ts);
-      votersList.innerHTML = voterList.map(v => {
-        const opt = OPTIONS.find(o => o.id === v.choice);
-        const color = opt ? opt.color : '#999';
-        const isMe = v.name === myName;
-        return `<span class="voter-chip" ${isMe ? 'style="border-color: ' + color + '; background: ' + (opt ? opt.colorSoft : 'var(--paper)') + ';"' : ''}>
-          <span class="voter-chip-dot" style="background: ${color};"></span>
-          ${escapeHtml(v.name)}${isMe ? ' (you)' : ''}
-        </span>`;
+      voterList.sort(function(a, b) { return b.ts - a.ts; });
+      votersList.innerHTML = voterList.map(function(v) {
+        var opt = OPTIONS.find(function(o) { return o.id === v.choice; });
+        var color = opt ? opt.color : '#999';
+        var isMe = v.name === myName;
+        return '<span class="voter-chip"' +
+          (isMe ? ' style="border-color: ' + color + '; background: ' + (opt ? opt.colorSoft : 'var(--paper)') + ';"' : '') +
+          '><span class="voter-chip-dot" style="background: ' + color + ';"></span>' +
+          escapeHtml(v.name) + (isMe ? ' (you)' : '') +
+          '</span>';
       }).join('');
     }
   }
 
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
-    );
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
   }
 
-  function refreshResults() {
-    allVotes = loadAllVotes();
-    if (myName && allVotes[myName]) {
+  // --- Name entry ---
+  function submitName() {
+    var v = nameInput.value.trim();
+    if (!v) { nameInput.focus(); return; }
+    myName = v;
+    sessionStorage.setItem('voter_name', myName);
+    // Check if this person already voted (from sync)
+    if (allVotes[myName]) {
       myVote = allVotes[myName].choice;
       sessionStorage.setItem('voter_choice', myVote);
     }
-    renderResults();
-    renderOptions();
-  }
-
-  // ---------- Name entry flow ----------
-  function submitName() {
-    const v = nameInput.value.trim();
-    if (!v) {
-      nameInput.focus();
-      return;
-    }
-    myName = v;
-    sessionStorage.setItem('voter_name', myName);
     showVotingView();
-    refreshResults();
+    renderOptions();
+    renderResults();
   }
 
   function showVotingView() {
@@ -843,41 +847,51 @@
     nameInput.focus();
   }
 
-  // ---------- Toast ----------
-  let toastTimeout;
+  // --- Toast ---
+  var toastTimeout;
   function showToast(msg) {
     clearTimeout(toastTimeout);
-    toast.textContent = msg;
-    toast.classList.add('show');
-    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2400);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimeout = setTimeout(function() { toastEl.classList.remove('show'); }, 2400);
   }
 
-  // ---------- Wire up events ----------
+  // --- Events ---
   nameSubmit.addEventListener('click', submitName);
-  nameInput.addEventListener('keydown', e => {
+  nameInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') submitName();
   });
-  changeName.addEventListener('click', () => {
+  changeNameBtn.addEventListener('click', function() {
     sessionStorage.removeItem('voter_name');
     sessionStorage.removeItem('voter_choice');
     myName = null;
     myVote = null;
     nameInput.value = '';
     showNameEntry();
-    refreshResults();
+    renderResults();
   });
 
-  // ---------- Initialize ----------
+  // --- Init ---
   (function init() {
+    // Load existing local votes (preserves any votes already cast)
+    allVotes = loadVotesLocal();
+
     if (myName) {
       myVote = sessionStorage.getItem('voter_choice');
+      if (allVotes[myName]) myVote = allVotes[myName].choice;
       showVotingView();
     } else {
       resultsSection.classList.remove('hidden');
     }
-    refreshResults();
-    // Poll localStorage every 4 seconds for updates from other tabs
-    setInterval(refreshResults, 4000);
+    renderResults();
+
+    // Ask other connected clients to share their votes
+    setTimeout(requestSync, 1500);
+
+    // Periodically broadcast our votes so new clients get caught up
+    setInterval(function() {
+      if (Object.keys(allVotes).length > 0) publishSync();
+    }, 30000);
   })();
 </script>
 
