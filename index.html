@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Outing Poll</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #F4EFE6;
+    --bg-deep: #ECE5D6;
+    --ink: #1F1611;
+    --ink-soft: #5C4F45;
+    --hairline: rgba(31, 22, 17, 0.12);
+    --paper: #FBF7EF;
+
+    --opt-1: #E5A823;
+    --opt-1-soft: #FAF0D4;
+    --opt-2: #5F7A3A;
+    --opt-2-soft: #E5EDD7;
+    --opt-3: #C04A1F;
+    --opt-3-soft: #F8DDD0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(31,22,17,0.04) 1px, transparent 0);
+    background-size: 16px 16px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .eyebrow {
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--opt-3);
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--opt-3);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* NAME ENTRY */
+  .name-card {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 40px 32px;
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .name-card .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .name-card h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  .name-input {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    padding: 8px 4px;
+    text-align: center;
+    width: min(100%, 360px);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .name-input:focus {
+    border-color: var(--opt-3);
+  }
+
+  .name-input::placeholder {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .name-submit {
+    display: block;
+    margin: 24px auto 0;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 14px 32px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: transform 0.15s, background 0.2s;
+  }
+
+  .name-submit:hover {
+    background: var(--opt-3);
+    transform: translateY(-1px);
+  }
+
+  /* GREETING */
+  .greeting {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .greeting-text {
+    font-size: 14px;
+  }
+
+  .greeting-text strong {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .change-name {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .change-name:hover { color: var(--ink); }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+  }
+
+  /* OPTION CARDS */
+  .options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  @media (min-width: 720px) {
+    .options { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .option {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+  }
+
+  .option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31,22,17,0.08);
+  }
+
+  .option[data-selected="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .option-emoji {
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .option-num {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .option-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .option-subtitle {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+
+  .option-details {
+    border-top: 1px solid var(--hairline);
+    padding-top: 14px;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+
+  .option-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 5px 0;
+    font-size: 12px;
+  }
+
+  .option-detail-row + .option-detail-row {
+    border-top: 1px dashed var(--hairline);
+  }
+
+  .option-detail-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+  }
+
+  .option-detail-value {
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+    line-height: 1.3;
+  }
+
+  .option-cta {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .option[data-selected="true"] .option-cta::before {
+    content: '✓';
+    background: var(--accent);
+    color: var(--paper);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  /* RESULTS */
+  .results {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 32px 28px;
+    margin-bottom: 24px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .results-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  .results-count {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .bar-row {
+    margin-bottom: 18px;
+  }
+
+  .bar-row:last-child { margin-bottom: 0; }
+
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    gap: 12px;
+  }
+
+  .bar-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-emoji { font-size: 18px; }
+
+  .bar-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bar-value .pct {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-left: 6px;
+  }
+
+  .bar-track {
+    height: 12px;
+    background: var(--bg-deep);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bar-color);
+    position: relative;
+  }
+
+  .bar-fill.winner::after {
+    content: '👑';
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+  }
+
+  /* VOTERS LIST */
+  .voters {
+    background: transparent;
+    border-top: 1px solid var(--hairline);
+    padding-top: 24px;
+    margin-top: 24px;
+  }
+
+  .voters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .voter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .voter-chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .empty {
+    color: var(--ink-soft);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(31,22,17,0.2);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="header">
+    <div>
+      <div class="eyebrow">Team Outing &bull; Live Poll</div>
+      <h1>Where are <em>we</em> going?</h1>
+    </div>
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      LIVE
+    </div>
+  </header>
+
+  <!-- NAME ENTRY -->
+  <div id="nameEntry" class="name-card">
+    <div class="num">&rarr; first things first</div>
+    <h2>What's your name?</h2>
+    <input
+      id="nameInput"
+      class="name-input"
+      type="text"
+      placeholder="type your name…"
+      autocomplete="name"
+      maxlength="40"
+    />
+    <button id="nameSubmit" class="name-submit">Cast my vote &rarr;</button>
+  </div>
+
+  <!-- GREETING (after name entered) -->
+  <div id="greeting" class="greeting hidden">
+    <div class="greeting-text">
+      Hey <strong id="greetingName"></strong> 👋 Pick your top choice below.
+    </div>
+    <button id="changeName" class="change-name">not me?</button>
+  </div>
+
+  <!-- VOTING OPTIONS -->
+  <div id="votingSection" class="hidden">
+    <div class="section-label">The contenders</div>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsSection" class="hidden">
+    <div class="results">
+      <div class="results-header">
+        <div class="results-title">Live results</div>
+        <div class="results-count" id="resultsCount">0 votes</div>
+      </div>
+      <div id="bars"></div>
+      <div class="voters">
+        <div class="section-label" style="margin-bottom: 0;">Who's voted</div>
+        <div class="voters-list" id="votersList">
+          <span class="empty">No votes yet — be the first!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Voting updates live every few seconds &bull; Refresh anytime
+  </div>
+</div>
+
+<div id="toast" class="toast">Vote saved</div>
+
+<script>
+  const OPTIONS = [
+    {
+      id: 'escape_room',
+      emoji: '🔓',
+      title: 'Escape Room + BWW',
+      subtitle: 'The Escape Game (Outlets at Orange) → Buffalo Wild Wings for wings, beer, and sports.',
+      color: '#E5A823',
+      colorSoft: '#FAF0D4',
+      details: [
+        ['Physical demand', 'None'],
+        ['Food / drinks', 'At BWW after'],
+        ['Time', '60–90 min + dinner'],
+        ['Drinks while playing', 'No (BWW after)'],
+        ['Best for', 'Problem-solvers']
+      ]
+    },
+    {
+      id: 'mini_golf',
+      emoji: '⛳',
+      title: 'Mini Golf at Holey Moley',
+      subtitle: '27 themed indoor holes at Irvine Spectrum with full bar and food menu.',
+      color: '#5F7A3A',
+      colorSoft: '#E5EDD7',
+      details: [
+        ['Physical demand', 'Low'],
+        ['Food / drinks', 'Full menu on-site'],
+        ['Time', '60 min + meal'],
+        ['Drinks while playing', 'Yes'],
+        ['Best for', 'Mixed group, conversation']
+      ]
+    },
+    {
+      id: 'axe_throwing',
+      emoji: '🪓',
+      title: 'Axe Throwing at Slashers',
+      subtitle: 'Horror-themed projection-target axe lanes in Costa Mesa.',
+      color: '#C04A1F',
+      colorSoft: '#F8DDD0',
+      details: [
+        ['Physical demand', 'Moderate'],
+        ['Food / drinks', 'Drinks + pizza on-site'],
+        ['Time', '60–90 min + meal'],
+        ['Drinks while playing', 'Yes'],
+        ['Best for', 'Stress relief / fun']
+      ]
+    }
+  ];
+
+  const STORAGE_KEY = 'live_poll_votes';
+
+  let myName = sessionStorage.getItem('voter_name') || null;
+  let myVote = null;
+  let allVotes = {};
+
+  // ---------- DOM refs ----------
+  const nameEntry = document.getElementById('nameEntry');
+  const nameInput = document.getElementById('nameInput');
+  const nameSubmit = document.getElementById('nameSubmit');
+  const greeting = document.getElementById('greeting');
+  const greetingName = document.getElementById('greetingName');
+  const changeName = document.getElementById('changeName');
+  const votingSection = document.getElementById('votingSection');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const resultsSection = document.getElementById('resultsSection');
+  const resultsCount = document.getElementById('resultsCount');
+  const bars = document.getElementById('bars');
+  const votersList = document.getElementById('votersList');
+  const toast = document.getElementById('toast');
+
+  // ---------- Render option cards ----------
+  function renderOptions() {
+    optionsContainer.innerHTML = '';
+    OPTIONS.forEach((opt, i) => {
+      const isSelected = myVote === opt.id;
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.style.setProperty('--accent', opt.color);
+      btn.style.setProperty('--accent-soft', opt.colorSoft);
+      btn.dataset.selected = isSelected;
+      btn.innerHTML = `
+        <div class="option-num">No. ${String(i + 1).padStart(2, '0')}</div>
+        <div class="option-emoji">${opt.emoji}</div>
+        <div class="option-title">${opt.title}</div>
+        <div class="option-subtitle">${opt.subtitle}</div>
+        <div class="option-details">
+          ${opt.details.map(([label, value]) => `
+            <div class="option-detail-row">
+              <span class="option-detail-label">${label}</span>
+              <span class="option-detail-value">${value}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="option-cta">${isSelected ? 'Your pick' : 'Pick this'}</div>
+      `;
+      btn.addEventListener('click', () => castVote(opt.id));
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  // ---------- Storage helpers (localStorage) ----------
+  function loadAllVotes() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      console.error('Load votes error:', e);
+      return {};
+    }
+  }
+
+  function saveAllVotes(votes) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
+    } catch (e) {
+      console.error('Save votes error:', e);
+    }
+  }
+
+  function castVote(choice) {
+    if (!myName) return;
+
+    allVotes[myName] = {
+      name: myName,
+      choice,
+      ts: Date.now()
+    };
+    saveAllVotes(allVotes);
+
+    myVote = choice;
+    sessionStorage.setItem('voter_choice', choice);
+    showToast(`Vote saved — ${OPTIONS.find(o => o.id === choice).title}`);
+    renderOptions();
+    refreshResults();
+  }
+
+  // ---------- Render results ----------
+  function renderResults() {
+    const counts = { escape_room: 0, mini_golf: 0, axe_throwing: 0 };
+    const voterList = [];
+    Object.values(allVotes).forEach(v => {
+      if (counts[v.choice] !== undefined) counts[v.choice]++;
+      voterList.push(v);
+    });
+    const total = voterList.length;
+    const maxCount = Math.max(...Object.values(counts), 1);
+
+    resultsCount.textContent = total === 1 ? '1 vote' : `${total} votes`;
+
+    bars.innerHTML = '';
+    OPTIONS.forEach(opt => {
+      const count = counts[opt.id];
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      const widthPct = total > 0 ? (count / maxCount) * 100 : 0;
+      const isWinner = total > 0 && count === maxCount && count > 0;
+
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = `
+        <div class="bar-label">
+          <div class="bar-name">
+            <span class="bar-emoji">${opt.emoji}</span>
+            <span>${opt.title}</span>
+          </div>
+          <div class="bar-value">
+            ${count}<span class="pct">${pct}%</span>
+          </div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${isWinner && total > 1 ? 'winner' : ''}"
+               style="width: ${widthPct}%; --bar-color: ${opt.color};"></div>
+        </div>
+      `;
+      bars.appendChild(row);
+    });
+
+    // Voters list
+    if (voterList.length === 0) {
+      votersList.innerHTML = '<span class="empty">No votes yet — be the first!</span>';
+    } else {
+      voterList.sort((a, b) => b.ts - a.ts);
+      votersList.innerHTML = voterList.map(v => {
+        const opt = OPTIONS.find(o => o.id === v.choice);
+        const color = opt ? opt.color : '#999';
+        const isMe = v.name === myName;
+        return `<span class="voter-chip" ${isMe ? 'style="border-color: ' + color + '; background: ' + (opt ? opt.colorSoft : 'var(--paper)') + ';"' : ''}>
+          <span class="voter-chip-dot" style="background: ${color};"></span>
+          ${escapeHtml(v.name)}${isMe ? ' (you)' : ''}
+        </span>`;
+      }).join('');
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+    );
+  }
+
+  function refreshResults() {
+    allVotes = loadAllVotes();
+    if (myName && allVotes[myName]) {
+      myVote = allVotes[myName].choice;
+      sessionStorage.setItem('voter_choice', myVote);
+    }
+    renderResults();
+    renderOptions();
+  }
+
+  // ---------- Name entry flow ----------
+  function submitName() {
+    const v = nameInput.value.trim();
+    if (!v) {
+      nameInput.focus();
+      return;
+    }
+    myName = v;
+    sessionStorage.setItem('voter_name', myName);
+    showVotingView();
+    refreshResults();
+  }
+
+  function showVotingView() {
+    nameEntry.classList.add('hidden');
+    greeting.classList.remove('hidden');
+    votingSection.classList.remove('hidden');
+    resultsSection.classList.remove('hidden');
+    greetingName.textContent = myName;
+    renderOptions();
+  }
+
+  function showNameEntry() {
+    nameEntry.classList.remove('hidden');
+    greeting.classList.add('hidden');
+    votingSection.classList.add('hidden');
+    nameInput.focus();
+  }
+
+  // ---------- Toast ----------
+  let toastTimeout;
+  function showToast(msg) {
+    clearTimeout(toastTimeout);
+    toast.textContent = msg;
+    toast.classList.add('show');
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  // ---------- Wire up events ----------
+  nameSubmit.addEventListener('click', submitName);
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitName();
+  });
+  changeName.addEventListener('click', () => {
+    sessionStorage.removeItem('voter_name');
+    sessionStorage.removeItem('voter_choice');
+    myName = null;
+    myVote = null;
+    nameInput.value = '';
+    showNameEntry();
+    refreshResults();
+  });
+
+  // ---------- Initialize ----------
+  (function init() {
+    if (myName) {
+      myVote = sessionStorage.getItem('voter_choice');
+      showVotingView();
+    } else {
+      resultsSection.classList.remove('hidden');
+    }
+    refreshResults();
+    // Poll localStorage every 4 seconds for updates from other tabs
+    setInterval(refreshResults, 4000);
+  })();
+</script>
+
+</body>
+</html>
